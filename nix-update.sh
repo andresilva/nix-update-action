@@ -24,12 +24,12 @@ updatePackages() {
   # update packages
   for PACKAGE in ${PACKAGES//,/ }; do
     if [[ ",$BLACKLIST," == *",$PACKAGE,"* ]]; then
-        echo "Package '$PACKAGE' is blacklisted, skipping."
-        continue
+      echo "Package '$PACKAGE' is blacklisted, skipping."
+      continue
     fi
     echo "Updating package '$PACKAGE'."
     # if current version is unstable, update to latest commit of default branch
-    CURRENT_VERSION=$(nix derivation show .#"$PACKAGE" | jq -r '.[].env.version')
+    CURRENT_VERSION=$(nix eval --raw .#"$PACKAGE".version)
     if [[ $CURRENT_VERSION == *"unstable"* ]]; then
       VERSION_FLAG="branch"
     else
