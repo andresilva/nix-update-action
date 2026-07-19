@@ -81,10 +81,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: yaxitech/nix-install-pkgs-action@v7
-      with:
-        packages: "nix-update,jq"
-        inputs-from: nixpkgs
     - name: Import bot's GPG key for signing commits
       if: ${{ inputs.sign-commits == 'true' }}
       id: import-gpg
@@ -119,7 +115,11 @@ runs:
         echo "GIT_COMMITTER_NAME=${{ inputs.git-committer-name }}" >> $GITHUB_ENV
         echo "GIT_COMMITTER_EMAIL=<${{ inputs.git-committer-email }}>" >> $GITHUB_ENV
     - name: Run nix-update
-      run: $GITHUB_ACTION_PATH/nix-update.sh
+      run: >
+        nix shell
+        --inputs-from "./${{ inputs.path-to-flake-dir }}"
+        nixpkgs#nix-update nixpkgs#jq
+        --command $GITHUB_ACTION_PATH/nix-update.sh
       shell: bash
       env:
         PACKAGES: ${{ inputs.packages }}
